@@ -16,7 +16,7 @@ module CCBlade
 import FLOWMath
 
 export Rotor, Section, OperatingPoint, Outputs
-export simple_op, windturbine_op
+export simple_op, windturbine_op, propeller_op
 export solve, thrusttorque, nondim
 
 
@@ -533,6 +533,60 @@ function simple_op(Vinf, Omega, r, rho; pitch=zero(rho), mu=one(rho), asound=one
     Vx = Vinf * cos(precone) 
     Vy = Omega * r * cos(precone)
 
+    return OperatingPoint(Vx, Vy, rho, pitch, mu, asound)
+
+end
+
+"""
+    propeller_op(Vhub, Omega, pitch, r, precone, yaw, tilt, azimuth, rho, mu=1.0, asound=1.0)
+
+Compute relative wind velocity components along blade accounting for inflow conditions
+and orientation of propeller.  See Documentation for angle definitions.
+
+**Arguments**
+- `Vhub::Float64`: freestream speed at hub (m/s)
+- `Omega::Float64`: rotation speed (rad/s)
+- `pitch::Float64`: pitch angle (rad)
+- `r::Float64`: radial location where inflow is computed (m)
+- `precone::Float64`: precone angle (rad)
+- `yaw::Float64`: yaw angle (rad)
+- `tilt::Float64`: tilt angle (rad)
+- `azimuth::Float64`: azimuth angle to evaluate at (rad)
+- `rho::Float64`: air density (kg/m^3)
+- `mu::Float64`: air viscosity (Pa * s)
+- `asound::Float64`: air speed of sound (m/s)
+"""
+function propeller_op(Vhub, Omega, pitch, r,  rho, precone=0.0, yaw=0.0, tilt=0.0, azimuth=0.0, mu=one(rho), asound=one(rho))
+    sy = sin(yaw)
+    cy = cos(yaw)
+    st = sin(tilt)
+    ct = cos(tilt)
+    sa = sin(azimuth)
+    ca = cos(azimuth)
+    sc = sin(precone)
+    cc = cos(precone)
+
+    # coordinate in azimuthal coordinate system
+    x_az = -r*sin(precone)
+    z_az = r*cos(precone)
+    y_az = 0.0  # could omit (the more general case allows for presweep so this is nonzero)
+    
+    # velocity 
+    V = Vhub
+
+    # transform wind to blade c.s.
+    Vwind_x = V * ((cy*st*ca + sy*sa)*sc + cy*ct*cc)
+    Vwind_y = V * (cy*st*sa - sy*ca)
+
+    # wind from rotation to blade c.s.
+    Vrot_x = -Omega*y_az*sc
+    Vrot_y = Omega*z_az
+
+    # total velocity
+    Vx = Vwind_x + Vrot_x
+    Vy = Vwind_y + Vrot_y
+
+    # operating point
     return OperatingPoint(Vx, Vy, rho, pitch, mu, asound)
 
 end
