@@ -556,7 +556,7 @@ and orientation of propeller.  See Documentation for angle definitions.
 - `mu::Float64`: air viscosity (Pa * s)
 - `asound::Float64`: air speed of sound (m/s)
 """
-function propeller_op(Vhub, Omega, pitch, r,  rho, precone=0.0, yaw=0.0, tilt=0.0, azimuth=0.0, mu=one(rho), asound=one(rho))
+function propeller_op(Vhub, Omega, pitch, r,  rho; precone=0.0, yaw=0.0, tilt=0.0, azimuth=0.0, mu=one(rho), asound=one(rho))
     sy = sin(yaw)
     cy = cos(yaw)
     st = sin(tilt)
