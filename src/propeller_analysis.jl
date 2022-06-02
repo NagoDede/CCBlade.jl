@@ -3,11 +3,12 @@ import Pkg;
 Pkg.add("Plots")
 Pkg.add("FLOWMath")
 
+
 include("CCBlade.jl")
 
 using Printf
 using Plots
-
+gr()
 Rtip = 1.95/2 # tip radius - MTV-18-195-56
 Rhub =0.15  # hub radius. MTV-18 is 301mm
 
@@ -45,7 +46,7 @@ FM2 = zeros(nP)
 sigma = B * chord / (pi * Rtip)
 
 #study per 10deg step
-x = 0:10*pi/180:2*pi
+x = 0:10*π/180:2π
 
 locval = zeros(Float64, r.len, x.len)
 op1 = CCBlade.simple_op.(Vinf, Omega, r, rho;  pitch=prop_pitch)
@@ -53,7 +54,7 @@ outputs1 = CCBlade.solve.(Ref(rotor), sections, op1)
 T1, Q1 = CCBlade.thrusttorque(rotor, sections, outputs1)
 #for i = 1:nP
 for i = 1:x.len
-    @printf("angle %f°\n",x[i]*180/pi)
+    @printf("angle %f°\n",x[i]*180/π)
     #simple propeller approach, aicraft yaw and pitch = 0
     #used for comparisons
     
@@ -69,16 +70,10 @@ for i = 1:x.len
         locval[j,i] = np
         j = j+1
     end
-    
-   
-
-
 
     #FM[i], CT[i], CQ[i] = CCBlade.nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
     #FM2[i], CT2[i], CQ2[i] = CCBlade.nondim(T2, Q2, Vinf, Omega, rho, rotor, "propeller")
     #@printf("CT: %.3e - CQ: %.3ee - CT2: %.3e - CQ2: %.3e \n", CT[i], CQ[i], CT2[i], CQ2[i])
 end
-
-
 
 heatmap(x,r,locval, projection = :polar)

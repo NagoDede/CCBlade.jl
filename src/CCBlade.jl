@@ -21,6 +21,7 @@ export solve, thrusttorque, nondim
 
 
 include("airfoils.jl")  # all the code related to airfoil data
+include("csystem.jl")
 
 # --------- structs -------------
 
@@ -578,6 +579,13 @@ function propeller_op(Vhub, Omega, pitch, r,  rho; precone=0.0, yaw=0.0, tilt=0.
     Vwind_x = V * ((cy*st*ca + sy*sa)*sc + cy*ct*cc)
     Vwind_y = V * (cy*st*sa - sy*ca)
 
+    wind = DirectionVector(Vhub, 0.0,0.0)
+    wind_y = windToYaw(wind, yaw)
+    wind_h = yawToHub(wind_y, tilt)
+    wind_a = hubToAzimuth(wind_h, precone)
+    wind_b = azimuthToBlade(wind_a, azimuth)
+
+    
     # wind from rotation to blade c.s.
     Vrot_x = -Omega*y_az*sc
     Vrot_y = Omega*z_az
