@@ -3,6 +3,7 @@ export yawToWind, windToYaw
 export hubToYaw, yawToHub
 export  hubToAzimuth, azimuthToHub
 export bladeToAzimuth, azimuthToBlade
+export winToBlade
 
 using Printf
 
@@ -146,7 +147,21 @@ function bladeToAzimuth(self::DirectionVector, Φ)
     return rotateAboutZ(self, :z, :x, :y, Φ)
 end
 
-a = DirectionVector(1.0,0.0,0.0)
-b=yawToWind(a,π/2)
-b=windToYaw(a,π/2)
-@printf("%f, %f, %f", b.x, b.y, b.z)
+"""Rotate from wind aligned to blade aligned
+Parameters
+----------
+Psi Ψ: yaw (rad)
+Theta Θ: tilt (rad)
+Lambda Λ: azimuth (rad)
+Phi Φ: precone (rad)
+Returns
+--------
+vector : DirectionVector
+    a DirectionVector in the blade-aligned coordinate system
+"""
+function windToBlade(self::DirectionVector, Ψ, Θ, Λ, Φ )
+    wind_y = windToYaw(self, Ψ)
+    wind_h = yawToHub(wind_y, Θ)
+    wind_a = hubToAzimuth(wind_h,  Λ)
+    return azimuthToBlade(wind_a, Φ)
+end

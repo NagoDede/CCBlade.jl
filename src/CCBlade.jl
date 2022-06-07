@@ -580,10 +580,7 @@ function propeller_op(Vhub, Omega, pitch, r,  rho; precone=0.0, yaw=0.0, tilt=0.
     Vwind_y = V * (cy*st*sa - sy*ca)
 
     wind = DirectionVector(Vhub, 0.0,0.0)
-    wind_y = windToYaw(wind, yaw)
-    wind_h = yawToHub(wind_y, tilt)
-    wind_a = hubToAzimuth(wind_h, precone)
-    wind_b = azimuthToBlade(wind_a, azimuth)
+    wind_b = windToBlade(wind, yaw, tilt, precone, azimuth)
 
     
     # wind from rotation to blade c.s.
@@ -591,8 +588,12 @@ function propeller_op(Vhub, Omega, pitch, r,  rho; precone=0.0, yaw=0.0, tilt=0.
     Vrot_y = Omega*z_az
 
     # total velocity
-    Vx = Vwind_x + Vrot_x
-    Vy = Vwind_y + Vrot_y
+    #Vx = Vwind_x + Vrot_x
+    #Vy = Vwind_y + Vrot_y
+
+    Vx = wind_b.x + Vrot_x
+    Vy = wind_b.y + Vrot_y
+
 
     # operating point
     return OperatingPoint(Vx, Vy, rho, pitch, mu, asound)
